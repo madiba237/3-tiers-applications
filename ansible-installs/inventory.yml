@@ -1,0 +1,33 @@
+# 1. Vos machines et leurs variables de connexion directes
+all:
+  hosts:
+    bastion:
+      ansible_host: 107.22.93.206
+      ansible_user: ubuntu
+      ansible_ssh_private_key_file: /home/alain/.ssh/alain_key.pem
+
+    serveur_prive_1:
+      ansible_host: 10.0.12.197
+      ansible_user: ubuntu
+
+    serveur_prive_2:
+      ansible_host: 10.0.3.66
+      ansible_user: ubuntu
+
+# 2. Vos groupes pour cibler vos playbooks et appliquer les Proxys
+  children:
+    frontend:
+      hosts:
+        bastion:
+
+    private_servers:
+      hosts:
+        serveur_prive_1:
+        serveur_prive_2:
+          # On applique le ProxyJump individuellement ou via ce groupe
+          # pour qu'il ne touche JAMAIS au bastion
+      vars:
+        ansible_ssh_private_key_file: /home/alain/.ssh/alain_key.pem
+        ansible_ssh_common_args: '-o ProxyJump=ubuntu@107.22.93.206 -o IdentityFile=/home/alain/.ssh/alain_key.pem -o StrictHostKeyChecking=no -o ForwardAgent=yes'
+        #ansible_ssh_common_args: '-o ProxyJump=ubuntu@44.203.51.235 -o IdentityFile=/home/alain/.ssh/alain_key.pem'
+        #ansible_ssh_common_args: '-o ProxyJump=ubuntu@44.203.51.235 -o IdentityFile=/home/alain/.ssh/alain_key.pem'
